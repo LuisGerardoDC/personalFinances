@@ -1,9 +1,9 @@
-package models
+package mssqlmodel
 
 import "time"
 
 type Record struct {
-	Concept  string
-	Quantity float32
-	Date     time.Time
+	Concept  string    `json:"concept"`
+	Quantity float32   `json:"quantity"`
+	Date     time.Time `json:"date"`
 }
