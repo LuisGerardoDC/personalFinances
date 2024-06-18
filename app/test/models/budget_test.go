@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LuisGerardoDC/personalFinances/app/src/models"
+	models "github.com/LuisGerardoDC/personalFinances/app/src/models/mssql"
 	"github.com/stretchr/testify/assert"
 )
 
