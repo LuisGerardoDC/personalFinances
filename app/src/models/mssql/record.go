@@ -1,11 +1,22 @@
 package mssqlmodel
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type Record struct {
-	ID         int       `json:"id"`
-	Concept    string    `json:"concept"`
-	Quantity   float32   `json:"quantity"`
-	Date       time.Time `json:"date"`
-	IsExpensse bool      `json:"isExpensse"`
+	ID         int
+	Concept    string
+	Quantity   float32
+	Date       time.Time
+	IsExpensse bool
+}
+
+func (r *Record) SaveRecord(bd *sql.DB) error {
+	return nil
+}
+
+func (r Record) SaveRecords(bd *sql.DB, records []Record) {
+
 }

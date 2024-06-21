@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"math"
 	"time"
+
+	requestModel "github.com/LuisGerardoDC/personalFinances/app/src/models/request"
 )
 
 type Budget struct {
@@ -19,8 +21,7 @@ type Budget struct {
 	RemainingBudget float32
 }
 
-func (b *Budget) NewBudget(assets []Record, startTime, endTime time.Time) {
-	b.Assets = assets
+func (b *Budget) NewBudget(assets []requestModel.Record, startTime, endTime time.Time) {
 	b.StartTime = startTime
 	b.EndTime = endTime
 	b.CalcBudgets()
