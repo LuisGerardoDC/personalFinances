@@ -1,6 +1,7 @@
 package mssqlmodel
 
 import (
+	"database/sql"
 	"math"
 	"time"
 )
@@ -37,4 +38,24 @@ func (b *Budget) CalcBudgets() {
 
 	b.RemainingBudget = b.TotalBudget - b.UsedBudget
 	b.RemainingBudget = float32(math.Round(float64(b.RemainingBudget)*100) / 100)
+}
+
+func (b *Budget) CreateInDB(db *sql.DB) error {
+	stmt, err := db.Prepare("INSERT INTO budgets (UserID,Name,TotalBudget,StartTime,EndTime,UsedBudget,RemainingBudget ) OUTPUT inserted.ID VALUES (@p1,@p2,@p3,@p4,@p5,@p6,@p7)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(
+		b.UserID,
+		b.Name,
+		b.TotalBudget,
+		b.StartTime,
+		b.EndTime,
+		b.UsedBudget,
+		b.RemainingBudget,
+	).Scan(b.ID)
+
+	return nil
 }
