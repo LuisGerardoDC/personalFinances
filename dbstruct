@@ -1,0 +1,34 @@
+CREATE DATABASE personal_finances;
+USE personal_finances;
+
+CREATE TABLE users(
+	ID INT auto_increment primary key,
+    Name varchar(30),
+    Email Varchar(30)
+);
+
+CREATE TABLE budgets(
+	ID INT auto_increment primary key,
+    UserID INT,
+    Name VARCHAR(50),
+	TtalBdget FLOAT,
+    StartTime DATETIME,
+    EndTime DATETIME,
+    UsedBudget float,
+    RemainingBudget float,    
+    FOREIGN KEY (UserID) REFERENCES users(ID) 
+);
+
+CREATE TABLE records (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Concept VARCHAR(255),
+    Date DATETIME,
+    Quantity FLOAT,
+    IsEpensse BOOLEAN,
+    BudgetID INT,
+    FOREIGN KEY (BudgetID) REFERENCES budgets(ID)
+);
+
+INSERT INTO users (Name, Email) VALUES
+("Luis","luis@personalfinances.com"),
+("DEV","dev@personalfinances.com");

@@ -7,10 +7,10 @@ import (
 
 func ConnectDB() *sql.DB {
 
-	usuario := ""
-	pass := ""
-	host := ""
-	dbName := ""
+	usuario := "personalFinancesBack"
+	pass := "Yolu54loki"
+	host := "localhost:"
+	dbName := "personal_finances"
 
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@%s/%s", usuario, pass, host, dbName))
 	if err != nil {
