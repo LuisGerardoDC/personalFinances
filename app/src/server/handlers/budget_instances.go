@@ -1,14 +1,19 @@
 package handlers
 
-import "github.com/LuisGerardoDC/personalFinances/app/src/server/usecases"
+import (
+	"github.com/LuisGerardoDC/personalFinances/app/src/server/usecases"
+	"github.com/LuisGerardoDC/personalFinances/app/src/utils"
+)
 
 var (
-	// conections
-
 	// database
+	dbConnection = utils.ConnectDB()
 
 	// dependencies
-	useCaseCreateNewBudget = usecases.CreateNewBudget{}
+	useCaseCreateNewBudget = usecases.CreateNewBudget{
+		DB: dbConnection,
+	}
+
 	// handlers
 	ImplementedNewBudgetHandler = &NewBudgetHandler{
 		useCase: &useCaseCreateNewBudget,
