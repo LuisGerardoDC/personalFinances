@@ -6,6 +6,9 @@ import (
 )
 
 type Budget struct {
+	ID              int
+	UserID          int
+	Name            string
 	TotalBudget     float32
 	StartTime       time.Time
 	EndTime         time.Time
