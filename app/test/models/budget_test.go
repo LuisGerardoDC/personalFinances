@@ -21,20 +21,16 @@ func TestCreateNewBudget(t *testing.T) {
 	expectedBudget := models.Budget{
 		StartTime:       mockedStartTime,
 		EndTime:         mockedEndTime,
-		Assets:          mockedAssets,
-		Expenses:        nil,
 		UsedBudget:      0,
 		RemainingBudget: 1000.0,
 	}
 
 	gottedBudget := models.Budget{}
 
-	gottedBudget.NewBudget(mockedAssets, mockedStartTime, mockedEndTime)
+	gottedBudget.NewBudget(mockedAssets)
 
 	assert.Equal(t, expectedBudget.StartTime, gottedBudget.StartTime)
 	assert.Equal(t, expectedBudget.EndTime, gottedBudget.EndTime)
-	assert.Equal(t, expectedBudget.Assets, gottedBudget.Assets)
-	assert.Equal(t, expectedBudget.Expenses, gottedBudget.Expenses)
 	assert.Equal(t, expectedBudget.UsedBudget, gottedBudget.UsedBudget)
 	assert.Equal(t, expectedBudget.RemainingBudget, gottedBudget.RemainingBudget)
 

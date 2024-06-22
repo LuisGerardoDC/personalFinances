@@ -66,15 +66,15 @@ func (b *Budget) RecordToMssql(assets, expences []requestModel.Record) {
 
 func (b *Budget) CreateInDB(db *sql.DB) error {
 
-	queryCreateBudget := "INSERT INTO budgets (UserID,Name,TotalBudget,StartTime,EndTime,UsedBudget,RemainingBudget ) OUTPUT inserted.ID VALUES (?,?,?,?,?,?,?)"
-	queryCreateRecord := "INSERT INTO records (Concept,Date,Quantity,IsEpensse,BudgetID ) OUTPUT inserted.ID VALUES (?,?,?,?,?)"
+	queryCreateBudget := "INSERT INTO budgets (UserID,Name,TotalBudget,StartTime,EndTime,UsedBudget,RemainingBudget ) VALUES (?,?,?,?,?,?,?);"
+	queryCreateRecord := "INSERT INTO records (Concept,Date,Quantity,IsEpensse,BudgetID ) VALUES (?,?,?,?,?);"
 
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
 
-	err = tx.QueryRow(queryCreateBudget,
+	result, err := tx.Exec(queryCreateBudget,
 		b.UserID,
 		b.Name,
 		b.TotalBudget,
@@ -82,12 +82,18 @@ func (b *Budget) CreateInDB(db *sql.DB) error {
 		b.EndTime,
 		b.UsedBudget,
 		b.RemainingBudget,
-	).Scan(&b.ID)
+	)
 
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
+	insertedID, err := result.LastInsertId()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	b.ID = int(insertedID)
 
 	for _, record := range b.Records {
 		_, err = tx.Exec(queryCreateRecord, record.Concept, record.Date, record.Quantity, record.IsExpensse, b.ID)
