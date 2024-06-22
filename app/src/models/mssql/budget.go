@@ -15,40 +15,66 @@ type Budget struct {
 	TotalBudget     float32
 	StartTime       time.Time
 	EndTime         time.Time
-	Assets          []Record
-	Expenses        []Record
+	Records         []Record
 	UsedBudget      float32
 	RemainingBudget float32
 }
 
-func (b *Budget) NewBudget(assets []requestModel.Record, startTime, endTime time.Time) {
-	b.StartTime = startTime
-	b.EndTime = endTime
+func (b *Budget) NewBudget(rb requestModel.Budget) {
+	b.RecordToMssql(rb.Assets, rb.Expenses)
+	b.UserID = rb.UserID
+	b.StartTime = rb.EndTime
+	b.EndTime = rb.EndTime
+	b.Name = rb.Name
 	b.CalcBudgets()
 }
 
 func (b *Budget) CalcBudgets() {
 	b.TotalBudget = 0
 	b.UsedBudget = 0
-	for _, asset := range b.Assets {
-		b.TotalBudget += asset.Quantity
-	}
-	for _, expense := range b.Expenses {
-		b.UsedBudget += expense.Quantity
+
+	for _, record := range b.Records {
+		if record.IsExpensse {
+			b.UsedBudget += record.Quantity
+		} else {
+			b.TotalBudget += record.Quantity
+		}
 	}
 
 	b.RemainingBudget = b.TotalBudget - b.UsedBudget
 	b.RemainingBudget = float32(math.Round(float64(b.RemainingBudget)*100) / 100)
 }
 
+func (b *Budget) RecordToMssql(assets, expences []requestModel.Record) {
+	for _, asset := range assets {
+		b.Records = append(b.Records, Record{
+			Concept:    asset.Concept,
+			Quantity:   asset.Quantity,
+			Date:       asset.Date,
+			IsExpensse: false,
+		})
+	}
+	for _, expence := range expences {
+		b.Records = append(b.Records, Record{
+			Concept:    expence.Concept,
+			Quantity:   expence.Quantity,
+			Date:       expence.Date,
+			IsExpensse: true,
+		})
+	}
+}
+
 func (b *Budget) CreateInDB(db *sql.DB) error {
-	stmt, err := db.Prepare("INSERT INTO budgets (UserID,Name,TotalBudget,StartTime,EndTime,UsedBudget,RemainingBudget ) OUTPUT inserted.ID VALUES (@p1,@p2,@p3,@p4,@p5,@p6,@p7)")
+
+	queryCreateBudget := "INSERT INTO budgets (UserID,Name,TotalBudget,StartTime,EndTime,UsedBudget,RemainingBudget ) OUTPUT inserted.ID VALUES (?,?,?,?,?,?,?)"
+	queryCreateRecord := "INSERT INTO records (Concept,Date,Quantity,IsEpensse,BudgetID ) OUTPUT inserted.ID VALUES (?,?,?,?,?)"
+
+	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
 
-	err = stmt.QueryRow(
+	err = tx.QueryRow(queryCreateBudget,
 		b.UserID,
 		b.Name,
 		b.TotalBudget,
@@ -56,7 +82,25 @@ func (b *Budget) CreateInDB(db *sql.DB) error {
 		b.EndTime,
 		b.UsedBudget,
 		b.RemainingBudget,
-	).Scan(b.ID)
+	).Scan(&b.ID)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	for _, record := range b.Records {
+		_, err = tx.Exec(queryCreateRecord, record.Concept, record.Date, record.Quantity, record.IsExpensse, b.ID)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

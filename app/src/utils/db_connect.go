@@ -8,7 +8,7 @@ import (
 func ConnectDB() *sql.DB {
 
 	usuario := "personalFinancesBack"
-	pass := "Yolu54loki"
+	pass := "Yolu@54&loki"
 	host := "localhost:"
 	dbName := "personal_finances"
 

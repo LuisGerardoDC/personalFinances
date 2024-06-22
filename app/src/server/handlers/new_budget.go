@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+
 	requestModel "github.com/LuisGerardoDC/personalFinances/app/src/models/request"
 	responseModel "github.com/LuisGerardoDC/personalFinances/app/src/models/response"
 	"github.com/LuisGerardoDC/personalFinances/app/src/server/usecases"
@@ -16,7 +18,7 @@ func (h *NewBudgetHandler) CreateNewBudget(c *gin.Context) {
 
 	if err := c.ShouldBindBodyWithJSON(&reqBudget); err != nil {
 		c.JSON(400, responseModel.Budget{
-			Error: "Invalid JSON Format",
+			Error: fmt.Sprint(err),
 		})
 		return
 	}

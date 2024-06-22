@@ -18,8 +18,7 @@ func (c *CreateNewBudget) CreateNewBudget(b requestModel.Budget) responseModel.B
 
 	newBudget := mssqlmodel.Budget{}
 
-	// todo hacer conversion de reqAsset a mssqlAsset
-	newBudget.NewBudget(b.Assets, b.StartTime, b.EndTime)
+	newBudget.NewBudget(b)
 
 	err := newBudget.CreateInDB(c.DB)
 
