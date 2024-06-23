@@ -18,22 +18,20 @@ type Record struct {
 
 func (r *Record) SaveRecord(db *sql.DB) error {
 
-	/*
-		1.- Guardar new Record
-		2.- Obtener de DB todos los records del Budget
-		3.- Calcular las cantidades del budget (totalBudget,UsedBudget,RemainingBudget)
-		4.- Actualizar Budget en db
-
-	*/
-	// todo update Budget
-	insertQuery := "INSERT INTO budgets (Concept,Date,Quantity,IsExpense,BudgetID) VALUES (?,?,?,?,?);"
-	getBudgetRecords := "SELECT Quantity, IsExpense FROM records WHERE BudgetID = @p1; "
+	var (
+		insertQuery       = "INSERT INTO budgets (Concept,Date,Quantity,IsExpense,BudgetID) VALUES (?,?,?,?,?);"
+		getBudgetRecords  = "SELECT Quantity, IsExpense FROM records WHERE BudgetID = @p1; "
+		updateBudgetQuery = "UPDATE budgets SET TotalBudget = @p1, UsedBudget = @p2, RemainingBudget = @p3 WHERE ID = @p4;"
+		budgetRecords     = []Record{}
+		budget            = Budget{}
+	)
 
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
 
+	// Saves NewRecord
 	result, err := tx.Exec(insertQuery,
 		r.Concept,
 		r.Date,
@@ -48,6 +46,45 @@ func (r *Record) SaveRecord(db *sql.DB) error {
 	}
 
 	r.ID, err = result.LastInsertId()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// Gets all Budget Records
+	stmt, err := tx.Prepare(getBudgetRecords)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rows, err := stmt.Query(r.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	for rows.Next() {
+		var gotR Record
+		err = rows.Scan(&gotR.Quantity, &gotR.IsExpensse)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		budgetRecords = append(budgetRecords, gotR)
+	}
+	budget.ID = r.BudgetID
+	budget.Records = budgetRecords
+
+	// Calc new quantites budget
+	budget.CalcBudgets()
+
+	// Update Budget in db
+	_, err = tx.Exec(updateBudgetQuery,
+		budget.TotalBudget,
+		budget.UsedBudget,
+		budget.RemainingBudget,
+		budget.ID,
+	)
 	if err != nil {
 		tx.Rollback()
 		return err

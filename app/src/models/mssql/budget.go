@@ -104,3 +104,19 @@ func (b *Budget) CreateInDB(db *sql.DB) error {
 
 	return tx.Commit()
 }
+
+func (b *Budget) GetByID(db *sql.DB) error {
+	query := "SELECT * FROM budgets WHERE ID = @p1;"
+
+	err := db.QueryRow(query, b.ID).Scan(
+		b.UserID,
+		b.Name,
+		b.TotalBudget,
+		b.StartTime,
+		b.EndTime,
+		b.UsedBudget,
+		b.RemainingBudget,
+	)
+
+	return err
+}

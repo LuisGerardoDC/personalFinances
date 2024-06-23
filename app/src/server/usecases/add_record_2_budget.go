@@ -13,10 +13,12 @@ type AddRecord2Busget struct {
 	DB *sql.DB
 }
 
-func (a *AddRecord2Busget) CreateNewRecord(r requestModel.Record) responseModel.Record {
-	var rr responseModel.Record
-
-	newRecord := mssqlmodel.Record{}
+func (a *AddRecord2Busget) CreateNewRecord(r requestModel.Record) responseModel.Budget {
+	var (
+		rr        responseModel.Budget
+		newRecord = mssqlmodel.Record{}
+		budget    = mssqlmodel.Budget{ID: int64(r.BudgetID)}
+	)
 
 	newRecord.RequestToMssql(r)
 
@@ -26,8 +28,15 @@ func (a *AddRecord2Busget) CreateNewRecord(r requestModel.Record) responseModel.
 		rr.Error = fmt.Sprint(err.Error())
 		return rr
 	}
-	rr.Code = 200
-	rr.Succes = true
-	rr.RecordID = newRecord.ID
+
+	err = budget.GetByID(a.DB)
+	if err != nil {
+		rr.Code = 500
+		rr.Error = fmt.Sprint(err.Error())
+		return rr
+	}
+
+	// Todo Cargar Records y armar response Budget
+
 	return rr
 }
