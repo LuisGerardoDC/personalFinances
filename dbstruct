@@ -11,7 +11,7 @@ CREATE TABLE budgets(
 	ID INT auto_increment primary key,
     UserID INT,
     Name VARCHAR(50),
-	TtalBdget FLOAT,
+	TotalBdget FLOAT,
     StartTime DATETIME,
     EndTime DATETIME,
     UsedBudget float,
@@ -24,7 +24,7 @@ CREATE TABLE records (
     Concept VARCHAR(255),
     Date DATETIME,
     Quantity FLOAT,
-    IsEpensse BOOLEAN,
+    IsExpense BOOLEAN,
     BudgetID INT,
     FOREIGN KEY (BudgetID) REFERENCES budgets(ID)
 );
