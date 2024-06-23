@@ -100,3 +100,14 @@ func (r *Record) RequestToMssql(rq requestModel.Record) {
 	r.Date = rq.Date
 	r.IsExpensse = rq.IsExpense
 }
+
+func (r *Record) GetRecordsByBudgetID(budgetID int64, db *sql.DB) ([]Record, error) {
+	var (
+		query   = "SELECT * FROM records WHERE BudgetID = @p1;"
+		records = []Record{}
+	)
+
+	err := db.QueryRow(query, budgetID).Scan()
+
+	return records, nil
+}
