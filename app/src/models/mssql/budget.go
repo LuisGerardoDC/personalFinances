@@ -9,7 +9,7 @@ import (
 )
 
 type Budget struct {
-	ID              int
+	ID              int64
 	UserID          int
 	Name            string
 	TotalBudget     float32
@@ -88,12 +88,11 @@ func (b *Budget) CreateInDB(db *sql.DB) error {
 		tx.Rollback()
 		return err
 	}
-	insertedID, err := result.LastInsertId()
+	b.ID, err = result.LastInsertId()
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	b.ID = int(insertedID)
 
 	for _, record := range b.Records {
 		_, err = tx.Exec(queryCreateRecord, record.Concept, record.Date, record.Quantity, record.IsExpensse, b.ID)
@@ -103,10 +102,5 @@ func (b *Budget) CreateInDB(db *sql.DB) error {
 		}
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit()
 }

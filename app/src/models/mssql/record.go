@@ -18,9 +18,23 @@ type Record struct {
 
 func (r *Record) SaveRecord(db *sql.DB) error {
 
-	insertQuery := "INSERT INTO budgets (Concept,Date,Quantity,IsExpense,BudgetID) VALUES (?,?,?,?,?)"
+	/*
+		1.- Guardar new Record
+		2.- Obtener de DB todos los records del Budget
+		3.- Calcular las cantidades del budget (totalBudget,UsedBudget,RemainingBudget)
+		4.- Actualizar Budget en db
 
-	result, err := db.Exec(insertQuery,
+	*/
+	// todo update Budget
+	insertQuery := "INSERT INTO budgets (Concept,Date,Quantity,IsExpense,BudgetID) VALUES (?,?,?,?,?);"
+	getBudgetRecords := "SELECT Quantity, IsExpense FROM records WHERE BudgetID = @p1; "
+
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	result, err := tx.Exec(insertQuery,
 		r.Concept,
 		r.Date,
 		r.Quantity,
@@ -29,14 +43,17 @@ func (r *Record) SaveRecord(db *sql.DB) error {
 	)
 
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
 	r.ID, err = result.LastInsertId()
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
-	return nil
+
+	return tx.Commit()
 }
 
 func (r *Record) RequestToMssql(rq requestModel.Record) {
