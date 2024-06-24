@@ -5,7 +5,6 @@ import (
 )
 
 type Record struct {
-	ID        int       `json:"id"`
 	BudgetID  int       `json:"budgetId"`
 	Concept   string    `json:"concept"`
 	Quantity  float32   `json:"quantity"`

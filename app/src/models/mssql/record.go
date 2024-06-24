@@ -19,9 +19,9 @@ type Record struct {
 func (r *Record) SaveRecord(db *sql.DB) error {
 
 	var (
-		insertQuery       = "INSERT INTO budgets (Concept,Date,Quantity,IsExpense,BudgetID) VALUES (?,?,?,?,?);"
-		getBudgetRecords  = "SELECT Quantity, IsExpense FROM records WHERE BudgetID = @p1; "
-		updateBudgetQuery = "UPDATE budgets SET TotalBudget = @p1, UsedBudget = @p2, RemainingBudget = @p3 WHERE ID = @p4;"
+		insertQuery       = "INSERT INTO records (Concept,Date,Quantity,IsExpense,BudgetID) VALUES (?,?,?,?,?);"
+		getBudgetRecords  = "SELECT Quantity, IsExpense FROM records WHERE BudgetID = ?; "
+		updateBudgetQuery = "UPDATE budgets SET TotalBudget = ?, UsedBudget = ?, RemainingBudget = ? WHERE ID = ?;"
 		budgetRecords     = []Record{}
 		budget            = Budget{}
 	)
@@ -57,7 +57,7 @@ func (r *Record) SaveRecord(db *sql.DB) error {
 		return err
 	}
 
-	rows, err := stmt.Query(r.ID)
+	rows, err := stmt.Query(r.BudgetID)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -103,16 +103,17 @@ func (r *Record) RequestToMssql(rq requestModel.Record) {
 
 func (r Record) GetRecordsByBudgetID(budgetID int64, db *sql.DB) ([]Record, error) {
 	var (
-		query      = "SELECT * FROM records WHERE BudgetID = @p1;"
+		query      = "SELECT ID, Concept, Date, Quantity, IsExpense FROM records WHERE BudgetID = ?;"
 		records    = []Record{}
 		readRecord Record
+		date       []byte
 	)
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := stmt.Query(query, budgetID)
+	rows, err := stmt.Query(budgetID)
 	if err != nil {
 		return nil, err
 	}
@@ -121,10 +122,14 @@ func (r Record) GetRecordsByBudgetID(budgetID int64, db *sql.DB) ([]Record, erro
 		err = rows.Scan(
 			&readRecord.ID,
 			&readRecord.Concept,
-			&readRecord.Date,
+			&date,
 			&readRecord.Quantity,
 			&readRecord.IsExpense,
 		)
+		if err != nil {
+			return nil, err
+		}
+		readRecord.Date, err = time.Parse("2006-01-02 15:04:05", string(date))
 		if err != nil {
 			return nil, err
 		}

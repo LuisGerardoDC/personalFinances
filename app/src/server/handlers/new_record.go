@@ -22,8 +22,8 @@ func (h *AddRecordHandler) AddNewRecord(c *gin.Context) {
 		})
 	}
 
-	resBudget := h.useCase.CreateNewRecord(reqRecord)
+	response := h.useCase.CreateNewRecord(reqRecord)
 
-	c.JSON(resBudget.Code, reqRecord)
+	c.JSON(response.Code, response)
 
 }

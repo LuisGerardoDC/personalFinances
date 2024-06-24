@@ -107,18 +107,30 @@ func (b *Budget) CreateInDB(db *sql.DB) error {
 }
 
 func (b *Budget) GetByID(db *sql.DB) error {
-	query := "SELECT * FROM budgets WHERE ID = @p1;"
-
-	err := db.QueryRow(query, b.ID).Scan(
-		b.UserID,
-		b.Name,
-		b.TotalBudget,
-		b.StartTime,
-		b.EndTime,
-		b.UsedBudget,
-		b.RemainingBudget,
+	var (
+		query     = "SELECT ID, UserID, Name, TotalBudget,StartTime,EndTime, UsedBudget, RemainingBudget FROM budgets WHERE ID = ?;"
+		startTime []byte
+		endTime   []byte
 	)
 
+	err := db.QueryRow(query, b.ID).Scan(
+		&b.ID,
+		&b.UserID,
+		&b.Name,
+		&b.TotalBudget,
+		&startTime,
+		&endTime,
+		&b.UsedBudget,
+		&b.RemainingBudget,
+	)
+	if err != nil {
+		return err
+	}
+	b.StartTime, err = time.Parse("2006-01-02 15:04:05", string(startTime))
+	if err != nil {
+		return err
+	}
+	b.EndTime, err = time.Parse("2006-01-02 15:04:05", string(endTime))
 	return err
 }
 
