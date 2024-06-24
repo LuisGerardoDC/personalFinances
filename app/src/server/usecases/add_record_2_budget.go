@@ -9,11 +9,11 @@ import (
 	responseModel "github.com/LuisGerardoDC/personalFinances/app/src/models/response"
 )
 
-type AddRecord2Busget struct {
+type AddRecord2Budget struct {
 	DB *sql.DB
 }
 
-func (a *AddRecord2Busget) CreateNewRecord(r requestModel.Record) responseModel.Response {
+func (a *AddRecord2Budget) CreateNewRecord(r requestModel.Record) responseModel.Response {
 	var (
 		rr        responseModel.Response
 		newRecord = mssqlmodel.Record{}
