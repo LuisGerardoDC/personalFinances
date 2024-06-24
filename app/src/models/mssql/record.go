@@ -8,12 +8,12 @@ import (
 )
 
 type Record struct {
-	ID         int64
-	Concept    string
-	Quantity   float32
-	Date       time.Time
-	IsExpensse bool
-	BudgetID   int64
+	ID        int64
+	Concept   string
+	Quantity  float32
+	Date      time.Time
+	IsExpense bool
+	BudgetID  int64
 }
 
 func (r *Record) SaveRecord(db *sql.DB) error {
@@ -36,7 +36,7 @@ func (r *Record) SaveRecord(db *sql.DB) error {
 		r.Concept,
 		r.Date,
 		r.Quantity,
-		r.IsExpensse,
+		r.IsExpense,
 		r.BudgetID,
 	)
 
@@ -65,7 +65,7 @@ func (r *Record) SaveRecord(db *sql.DB) error {
 
 	for rows.Next() {
 		var gotR Record
-		err = rows.Scan(&gotR.Quantity, &gotR.IsExpensse)
+		err = rows.Scan(&gotR.Quantity, &gotR.IsExpense)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -98,7 +98,7 @@ func (r *Record) RequestToMssql(rq requestModel.Record) {
 	r.Concept = rq.Concept
 	r.Quantity = rq.Quantity
 	r.Date = rq.Date
-	r.IsExpensse = rq.IsExpense
+	r.IsExpense = rq.IsExpense
 }
 
 func (r Record) GetRecordsByBudgetID(budgetID int64, db *sql.DB) ([]Record, error) {
@@ -123,7 +123,7 @@ func (r Record) GetRecordsByBudgetID(budgetID int64, db *sql.DB) ([]Record, erro
 			&readRecord.Concept,
 			&readRecord.Date,
 			&readRecord.Quantity,
-			&readRecord.IsExpensse,
+			&readRecord.IsExpense,
 		)
 		if err != nil {
 			return nil, err

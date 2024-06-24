@@ -35,7 +35,7 @@ func (b *Budget) CalcBudgets() {
 	b.UsedBudget = 0
 
 	for _, record := range b.Records {
-		if record.IsExpensse {
+		if record.IsExpense {
 			b.UsedBudget += record.Quantity
 		} else {
 			b.TotalBudget += record.Quantity
@@ -49,18 +49,18 @@ func (b *Budget) CalcBudgets() {
 func (b *Budget) RecordToMssql(assets, expences []requestModel.Record) {
 	for _, asset := range assets {
 		b.Records = append(b.Records, Record{
-			Concept:    asset.Concept,
-			Quantity:   asset.Quantity,
-			Date:       asset.Date,
-			IsExpensse: false,
+			Concept:   asset.Concept,
+			Quantity:  asset.Quantity,
+			Date:      asset.Date,
+			IsExpense: false,
 		})
 	}
 	for _, expence := range expences {
 		b.Records = append(b.Records, Record{
-			Concept:    expence.Concept,
-			Quantity:   expence.Quantity,
-			Date:       expence.Date,
-			IsExpensse: true,
+			Concept:   expence.Concept,
+			Quantity:  expence.Quantity,
+			Date:      expence.Date,
+			IsExpense: true,
 		})
 	}
 }
@@ -68,7 +68,7 @@ func (b *Budget) RecordToMssql(assets, expences []requestModel.Record) {
 func (b *Budget) CreateInDB(db *sql.DB) error {
 
 	queryCreateBudget := "INSERT INTO budgets (UserID,Name,TotalBudget,StartTime,EndTime,UsedBudget,RemainingBudget ) VALUES (?,?,?,?,?,?,?);"
-	queryCreateRecord := "INSERT INTO records (Concept,Date,Quantity,IsEpensse,BudgetID ) VALUES (?,?,?,?,?);"
+	queryCreateRecord := "INSERT INTO records (Concept,Date,Quantity,IsExpense,BudgetID ) VALUES (?,?,?,?,?);"
 
 	tx, err := db.Begin()
 	if err != nil {
@@ -96,7 +96,7 @@ func (b *Budget) CreateInDB(db *sql.DB) error {
 	}
 
 	for _, record := range b.Records {
-		_, err = tx.Exec(queryCreateRecord, record.Concept, record.Date, record.Quantity, record.IsExpensse, b.ID)
+		_, err = tx.Exec(queryCreateRecord, record.Concept, record.Date, record.Quantity, record.IsExpense, b.ID)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -143,7 +143,7 @@ func (b *Budget) ToResponseBudget() *responseModel.Budget {
 			Date:     record.Date,
 		}
 
-		if record.IsExpensse {
+		if record.IsExpense {
 			rb.Expenses = append(rb.Expenses, respRecord)
 		} else {
 			rb.Assets = append(rb.Assets, respRecord)
