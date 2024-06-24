@@ -13,8 +13,8 @@ type CreateNewBudget struct {
 	DB *sql.DB
 }
 
-func (c *CreateNewBudget) CreateNewBudget(b requestModel.Budget) responseModel.Budget {
-	var rb responseModel.Budget
+func (c *CreateNewBudget) CreateNewBudget(b requestModel.Budget) responseModel.Response {
+	var rb responseModel.Response
 
 	newBudget := mssqlmodel.Budget{}
 
@@ -24,14 +24,14 @@ func (c *CreateNewBudget) CreateNewBudget(b requestModel.Budget) responseModel.B
 
 	if err != nil {
 		rb.Code = 500
-		rb.Succes = "False"
+		rb.Succes = false
 		rb.Error = fmt.Sprint(err)
 		return rb
 	}
 
-	rb.Budget = &newBudget
+	rb.Budget = newBudget.ToResponseBudget()
 	rb.Code = 200
-	rb.Succes = "True"
+	rb.Succes = false
 
 	return rb
 }

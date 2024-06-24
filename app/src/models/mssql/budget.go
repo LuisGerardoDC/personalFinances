@@ -6,6 +6,7 @@ import (
 	"time"
 
 	requestModel "github.com/LuisGerardoDC/personalFinances/app/src/models/request"
+	responseModel "github.com/LuisGerardoDC/personalFinances/app/src/models/response"
 )
 
 type Budget struct {
@@ -119,4 +120,35 @@ func (b *Budget) GetByID(db *sql.DB) error {
 	)
 
 	return err
+}
+
+func (b *Budget) ToResponseBudget() *responseModel.Budget {
+	var (
+		rb         responseModel.Budget
+		respRecord responseModel.Record
+	)
+	rb.ID = b.ID
+	rb.EndTime = b.EndTime
+	rb.StartTime = b.StartTime
+	rb.Name = b.Name
+	rb.RemainingBudget = b.RemainingBudget
+	rb.UsedBudget = b.UsedBudget
+	rb.TotalBudget = b.TotalBudget
+
+	for _, record := range b.Records {
+		respRecord = responseModel.Record{
+			ID:       record.ID,
+			Concept:  record.Concept,
+			Quantity: record.Quantity,
+			Date:     record.Date,
+		}
+
+		if record.IsExpensse {
+			rb.Expenses = append(rb.Expenses, respRecord)
+		} else {
+			rb.Assets = append(rb.Assets, respRecord)
+		}
+	}
+
+	return &rb
 }

@@ -1,8 +1,10 @@
 package responseModel
 
+import "time"
+
 type Record struct {
-	Succes   bool   `json:"succes,omitempty"`
-	Error    string `json:"error,omitempty"`
-	Code     int    `json:"code,omitempty"`
-	RecordID int64  `json:"id,omitempty"`
+	ID       int64     `json:"id"`
+	Concept  string    `json:"concept"`
+	Quantity float32   `json:"quantity"`
+	Date     time.Time `json:"date"`
 }

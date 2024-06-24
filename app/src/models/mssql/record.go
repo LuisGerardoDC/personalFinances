@@ -101,13 +101,35 @@ func (r *Record) RequestToMssql(rq requestModel.Record) {
 	r.IsExpensse = rq.IsExpense
 }
 
-func (r *Record) GetRecordsByBudgetID(budgetID int64, db *sql.DB) ([]Record, error) {
+func (r Record) GetRecordsByBudgetID(budgetID int64, db *sql.DB) ([]Record, error) {
 	var (
-		query   = "SELECT * FROM records WHERE BudgetID = @p1;"
-		records = []Record{}
+		query      = "SELECT * FROM records WHERE BudgetID = @p1;"
+		records    = []Record{}
+		readRecord Record
 	)
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
 
-	err := db.QueryRow(query, budgetID).Scan()
+	rows, err := stmt.Query(query, budgetID)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(
+			&readRecord.ID,
+			&readRecord.Concept,
+			&readRecord.Date,
+			&readRecord.Quantity,
+			&readRecord.IsExpensse,
+		)
+		if err != nil {
+			return nil, err
+		}
+		records = append(records, readRecord)
+	}
 
 	return records, nil
 }

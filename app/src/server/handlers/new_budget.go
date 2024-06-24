@@ -17,7 +17,7 @@ func (h *NewBudgetHandler) CreateNewBudget(c *gin.Context) {
 	var reqBudget requestModel.Budget
 
 	if err := c.ShouldBindBodyWithJSON(&reqBudget); err != nil {
-		c.JSON(400, responseModel.Budget{
+		c.JSON(400, responseModel.Response{
 			Error: fmt.Sprint(err),
 		})
 		return
