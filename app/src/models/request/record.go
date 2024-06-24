@@ -5,8 +5,9 @@ import (
 )
 
 type Record struct {
-	ID       int       `json:"id"`
-	Concept  string    `json:"concept"`
-	Quantity float32   `json:"quantity"`
-	Date     time.Time `json:"date"`
+	BudgetID  int       `json:"budgetId"`
+	Concept   string    `json:"concept"`
+	Quantity  float32   `json:"quantity"`
+	Date      time.Time `json:"date"`
+	IsExpense bool      `json:"isExpense"`
 }

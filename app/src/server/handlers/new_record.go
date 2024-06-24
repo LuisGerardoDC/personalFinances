@@ -9,21 +9,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type NewBudgetHandler struct {
-	useCase *usecases.CreateNewBudget
+type AddRecordHandler struct {
+	useCase *usecases.AddRecord2Budget
 }
 
-func (h *NewBudgetHandler) CreateNewBudget(c *gin.Context) {
-	var reqBudget requestModel.Budget
+func (h *AddRecordHandler) AddNewRecord(c *gin.Context) {
+	var reqRecord requestModel.Record
 
-	if err := c.ShouldBindBodyWithJSON(&reqBudget); err != nil {
+	if err := c.ShouldBindBodyWithJSON(&reqRecord); err != nil {
 		c.JSON(400, responseModel.Response{
 			Error: fmt.Sprint(err),
 		})
-		return
 	}
 
-	resBudget := h.useCase.CreateNewBudget(reqBudget)
+	response := h.useCase.CreateNewRecord(reqRecord)
 
-	c.JSON(resBudget.Code, resBudget)
+	c.JSON(response.Code, response)
+
 }

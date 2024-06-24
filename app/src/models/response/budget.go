@@ -1,12 +1,15 @@
 package responseModel
 
-import (
-	models "github.com/LuisGerardoDC/personalFinances/app/src/models/mssql"
-)
+import "time"
 
 type Budget struct {
-	Succes string         `json:"succes,omitempty"`
-	Error  string         `json:"error,omitempty"`
-	Code   int            `json:"code,omitempty"`
-	Budget *models.Budget `json:"budget,omitempty"`
+	ID              int64     `json:"id"`
+	Name            string    `json:"name"`
+	TotalBudget     float32   `json:"totalBudget"`
+	RemainingBudget float32   `json:"remainigBudget"`
+	UsedBudget      float32   `json:"usedBudget"`
+	StartTime       time.Time `json:"starttime"`
+	EndTime         time.Time `json:"endtime"`
+	Assets          []Record  `json:"assets"`
+	Expenses        []Record  `json:"expenses"`
 }

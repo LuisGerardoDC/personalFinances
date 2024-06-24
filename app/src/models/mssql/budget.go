@@ -6,10 +6,11 @@ import (
 	"time"
 
 	requestModel "github.com/LuisGerardoDC/personalFinances/app/src/models/request"
+	responseModel "github.com/LuisGerardoDC/personalFinances/app/src/models/response"
 )
 
 type Budget struct {
-	ID              int
+	ID              int64
 	UserID          int
 	Name            string
 	TotalBudget     float32
@@ -34,7 +35,7 @@ func (b *Budget) CalcBudgets() {
 	b.UsedBudget = 0
 
 	for _, record := range b.Records {
-		if record.IsExpensse {
+		if record.IsExpense {
 			b.UsedBudget += record.Quantity
 		} else {
 			b.TotalBudget += record.Quantity
@@ -48,18 +49,18 @@ func (b *Budget) CalcBudgets() {
 func (b *Budget) RecordToMssql(assets, expences []requestModel.Record) {
 	for _, asset := range assets {
 		b.Records = append(b.Records, Record{
-			Concept:    asset.Concept,
-			Quantity:   asset.Quantity,
-			Date:       asset.Date,
-			IsExpensse: false,
+			Concept:   asset.Concept,
+			Quantity:  asset.Quantity,
+			Date:      asset.Date,
+			IsExpense: false,
 		})
 	}
 	for _, expence := range expences {
 		b.Records = append(b.Records, Record{
-			Concept:    expence.Concept,
-			Quantity:   expence.Quantity,
-			Date:       expence.Date,
-			IsExpensse: true,
+			Concept:   expence.Concept,
+			Quantity:  expence.Quantity,
+			Date:      expence.Date,
+			IsExpense: true,
 		})
 	}
 }
@@ -67,7 +68,7 @@ func (b *Budget) RecordToMssql(assets, expences []requestModel.Record) {
 func (b *Budget) CreateInDB(db *sql.DB) error {
 
 	queryCreateBudget := "INSERT INTO budgets (UserID,Name,TotalBudget,StartTime,EndTime,UsedBudget,RemainingBudget ) VALUES (?,?,?,?,?,?,?);"
-	queryCreateRecord := "INSERT INTO records (Concept,Date,Quantity,IsEpensse,BudgetID ) VALUES (?,?,?,?,?);"
+	queryCreateRecord := "INSERT INTO records (Concept,Date,Quantity,IsExpense,BudgetID ) VALUES (?,?,?,?,?);"
 
 	tx, err := db.Begin()
 	if err != nil {
@@ -88,25 +89,78 @@ func (b *Budget) CreateInDB(db *sql.DB) error {
 		tx.Rollback()
 		return err
 	}
-	insertedID, err := result.LastInsertId()
+	b.ID, err = result.LastInsertId()
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	b.ID = int(insertedID)
 
 	for _, record := range b.Records {
-		_, err = tx.Exec(queryCreateRecord, record.Concept, record.Date, record.Quantity, record.IsExpensse, b.ID)
+		_, err = tx.Exec(queryCreateRecord, record.Concept, record.Date, record.Quantity, record.IsExpense, b.ID)
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
-	err = tx.Commit()
+	return tx.Commit()
+}
+
+func (b *Budget) GetByID(db *sql.DB) error {
+	var (
+		query     = "SELECT ID, UserID, Name, TotalBudget,StartTime,EndTime, UsedBudget, RemainingBudget FROM budgets WHERE ID = ?;"
+		startTime []byte
+		endTime   []byte
+	)
+
+	err := db.QueryRow(query, b.ID).Scan(
+		&b.ID,
+		&b.UserID,
+		&b.Name,
+		&b.TotalBudget,
+		&startTime,
+		&endTime,
+		&b.UsedBudget,
+		&b.RemainingBudget,
+	)
 	if err != nil {
 		return err
 	}
+	b.StartTime, err = time.Parse("2006-01-02 15:04:05", string(startTime))
+	if err != nil {
+		return err
+	}
+	b.EndTime, err = time.Parse("2006-01-02 15:04:05", string(endTime))
+	return err
+}
 
-	return nil
+func (b *Budget) ToResponseBudget() *responseModel.Budget {
+	var (
+		rb         responseModel.Budget
+		respRecord responseModel.Record
+	)
+	rb.ID = b.ID
+	rb.EndTime = b.EndTime
+	rb.StartTime = b.StartTime
+	rb.Name = b.Name
+	rb.RemainingBudget = b.RemainingBudget
+	rb.UsedBudget = b.UsedBudget
+	rb.TotalBudget = b.TotalBudget
+
+	for _, record := range b.Records {
+		respRecord = responseModel.Record{
+			ID:       record.ID,
+			Concept:  record.Concept,
+			Quantity: record.Quantity,
+			Date:     record.Date,
+		}
+
+		if record.IsExpense {
+			rb.Expenses = append(rb.Expenses, respRecord)
+		} else {
+			rb.Assets = append(rb.Assets, respRecord)
+		}
+	}
+
+	return &rb
 }
