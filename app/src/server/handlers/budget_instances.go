@@ -17,7 +17,7 @@ var (
 		DB: dbConnection,
 	}
 
-	useCaseGetHandler = usecases.GetBudget{
+	useCaseGetBudgetHandler = usecases.GetBudget{
 		DB: dbConnection,
 	}
 
@@ -31,6 +31,6 @@ var (
 	}
 
 	ImplementedGetBudget = &GetBudgetHandler{
-		useCase: &useCaseGetHandler,
+		useCase: &useCaseGetBudgetHandler,
 	}
 )
