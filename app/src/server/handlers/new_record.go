@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-
 	requestModel "github.com/LuisGerardoDC/personalFinances/app/src/models/request"
 	responseModel "github.com/LuisGerardoDC/personalFinances/app/src/models/response"
 	"github.com/LuisGerardoDC/personalFinances/app/src/server/usecases"
@@ -18,7 +16,8 @@ func (h *AddRecordHandler) AddNewRecord(c *gin.Context) {
 
 	if err := c.ShouldBindBodyWithJSON(&reqRecord); err != nil {
 		c.JSON(400, responseModel.Response{
-			Error: fmt.Sprint(err),
+			Error:  err.Error(),
+			Succes: false,
 		})
 	}
 
