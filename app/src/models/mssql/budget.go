@@ -24,7 +24,7 @@ type Budget struct {
 func (b *Budget) NewBudget(rb requestModel.Budget) {
 	b.RecordToMssql(rb.Assets, rb.Expenses)
 	b.UserID = rb.UserID
-	b.StartTime = rb.EndTime
+	b.StartTime = rb.StartTime
 	b.EndTime = rb.EndTime
 	b.Name = rb.Name
 	b.CalcBudgets()
