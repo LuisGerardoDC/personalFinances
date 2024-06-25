@@ -17,6 +17,10 @@ var (
 		DB: dbConnection,
 	}
 
+	useCaseGetHandler = usecases.GetBudget{
+		DB: dbConnection,
+	}
+
 	// handlers
 	ImplementedNewBudgetHandler = &NewBudgetHandler{
 		useCase: &useCaseCreateNewBudget,
@@ -24,5 +28,9 @@ var (
 
 	ImplementedAddRecordHandler = &AddRecordHandler{
 		useCase: &useCaseAddRecord,
+	}
+
+	ImplementedGetBudget = &GetBudgetHandler{
+		useCase: &useCaseGetHandler,
 	}
 )
