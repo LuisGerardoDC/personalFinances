@@ -53,61 +53,106 @@ func TestCreateNewBudget(t *testing.T) {
 	assert.Equal(t, expectedBudget.UsedBudget, gottedBudget.UsedBudget)
 	assert.Equal(t, expectedBudget.RemainingBudget, gottedBudget.RemainingBudget)
 	assert.Equal(t, expectedBudget.TotalBudget, gottedBudget.TotalBudget)
-
 }
 
 func TestCalcBudget(t *testing.T) {
-	mockedStartTime := time.Now()
-	mockedRecords := []Record{
-		{
-			Concept:   "Test",
-			Quantity:  1000.0,
-			Date:      mockedStartTime,
-			IsExpense: false,
-		},
-		{
-			Concept:   "Test1",
-			Quantity:  2000.0,
-			Date:      mockedStartTime,
-			IsExpense: false,
-		},
-		{
-			Concept:   "Test1",
-			Quantity:  223.45,
-			Date:      mockedStartTime,
-			IsExpense: false,
-		},
-		{
-			Concept:   "Test",
-			Quantity:  10,
-			Date:      mockedStartTime,
-			IsExpense: true,
-		},
-		{
-			Concept:   "Test1",
-			Quantity:  200,
-			Date:      mockedStartTime,
-			IsExpense: true,
-		},
-		{
-			Concept:   "Test1",
-			Quantity:  3000,
-			Date:      mockedStartTime,
-			IsExpense: true,
-		},
-	}
+	var (
+		mockedStartTime = time.Now()
+		mockedRecords   = []Record{
+			{
+				Concept:   "Test",
+				Quantity:  1000.0,
+				Date:      mockedStartTime,
+				IsExpense: false,
+			},
+			{
+				Concept:   "Test1",
+				Quantity:  2000.0,
+				Date:      mockedStartTime,
+				IsExpense: false,
+			},
+			{
+				Concept:   "Test1",
+				Quantity:  223.45,
+				Date:      mockedStartTime,
+				IsExpense: false,
+			},
+			{
+				Concept:   "Test",
+				Quantity:  10,
+				Date:      mockedStartTime,
+				IsExpense: true,
+			},
+			{
+				Concept:   "Test1",
+				Quantity:  200,
+				Date:      mockedStartTime,
+				IsExpense: true,
+			},
+			{
+				Concept:   "Test1",
+				Quantity:  3000,
+				Date:      mockedStartTime,
+				IsExpense: true,
+			},
+		}
 
-	ExpectedTotalBudget := float32(3223.45)
-	ExpectedUsedBudget := float32(3210)
-	ExpectedRemainingBudget := float32(13.45)
+		ExpectedTotalBudget     = float32(3223.45)
+		ExpectedUsedBudget      = float32(3210)
+		ExpectedRemainingBudget = float32(13.45)
 
-	mockedBudget := Budget{
-		Records: mockedRecords,
-	}
+		mockedBudget = Budget{
+			Records: mockedRecords,
+		}
+	)
+
 	mockedBudget.CalcBudgets()
 
 	assert.Equal(t, mockedBudget.RemainingBudget, ExpectedRemainingBudget)
 	assert.Equal(t, mockedBudget.UsedBudget, ExpectedUsedBudget)
 	assert.Equal(t, mockedBudget.TotalBudget, ExpectedTotalBudget)
+}
 
+func TestRecordToMssql(t *testing.T) {
+	var (
+		mockedTime   = time.Now()
+		budget       = Budget{}
+		mockedAssets = []requestModel.Record{
+			{
+				Concept:  "asset1",
+				Quantity: 1000.0,
+				Date:     mockedTime,
+			},
+			{
+				Concept:  "asset2",
+				Quantity: 2000.0,
+				Date:     mockedTime,
+			},
+			{
+				Concept:  "asset3",
+				Quantity: 223.45,
+				Date:     mockedTime,
+			},
+		}
+		mockedExpenses = []requestModel.Record{
+			{
+				Concept:  "expense1",
+				Quantity: 10,
+				Date:     mockedTime,
+			},
+			{
+				Concept:  "expense2",
+				Quantity: 200,
+				Date:     mockedTime,
+			},
+			{
+				Concept:  "expense3",
+				Quantity: 3000,
+				Date:     mockedTime,
+			},
+		}
+	)
+
+	budget.RecordToMssql(mockedAssets, mockedExpenses)
+	assert.Equal(t, len(budget.Records), 6)
 }
