@@ -15,32 +15,20 @@ func (g *GetBudget) GetBudget(id int64) responseModel.Response {
 	var (
 		response responseModel.Response
 		budget   mssqlmodel.Budget
-		records  []mssqlmodel.Record
 	)
 
 	budget.ID = id
 	err := budget.GetByID(g.DB)
 	if err != nil {
-		return g.returnError(err)
+		response.Code = 500
+		response.Succes = false
+		response.Error = err.Error()
+		return response
 	}
 
-	records, err = mssqlmodel.Record{}.GetRecordsByBudgetID(budget.ID, g.DB)
-	if err != nil {
-		return g.returnError(err)
-	}
-
-	budget.Records = records
 	response.Budget = budget.ToResponseBudget()
 	response.Code = 200
 	response.Succes = true
 
 	return response
-}
-
-func (g *GetBudget) returnError(err error) responseModel.Response {
-	return responseModel.Response{
-		Error:  err.Error(),
-		Succes: false,
-		Code:   500,
-	}
 }

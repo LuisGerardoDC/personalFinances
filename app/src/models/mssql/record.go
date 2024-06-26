@@ -101,6 +101,14 @@ func (r *Record) RequestToMssql(rq requestModel.Record) {
 	r.IsExpense = rq.IsExpense
 }
 
+func (r Record) RemoveRecord(budgetID, RecordID int64) error {
+	// Saves NewRecord
+	// Gets all Budget Records
+	// Calc new quantites budget
+	// Update Budget in db
+	return nil
+}
+
 func (r Record) GetRecordsByBudgetID(budgetID int64, db *sql.DB) ([]Record, error) {
 	var (
 		query      = "SELECT ID, Concept, Date, Quantity, IsExpense FROM records WHERE BudgetID = ?;"
