@@ -19,7 +19,7 @@ func (d *RemoveRecord) DeleteRecord(req requestModel.DeleteRecord) responseModel
 		budget   = mssqlmodel.Budget{ID: int64(req.BudgetID)}
 	)
 
-	err := mssqlmodel.Record{}.RemoveRecord(int64(req.BudgetID), int64(req.RecordID))
+	err := mssqlmodel.Record{}.RemoveRecord(int64(req.BudgetID), int64(req.RecordID), d.DB)
 	if err != nil {
 		response.Code = 500
 		response.Error = fmt.Sprint(err.Error())
