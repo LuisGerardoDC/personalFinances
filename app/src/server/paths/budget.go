@@ -8,6 +8,8 @@ import (
 func AddBudgetRoutes(router *gin.Engine) {
 	budgetRoutes := router.Group("/budget")
 	budgetRoutes.POST("/new", handlers.ImplementedNewBudgetHandler.CreateNewBudget)
-	budgetRoutes.POST("/add/record/", handlers.ImplementedAddRecordHandler.AddNewRecord)
+	budgetRoutes.POST("/record", handlers.ImplementedAddRecordHandler.AddNewRecord)
+	budgetRoutes.DELETE("/record", handlers.ImplementedDeleteRecordHandler.DeleteRecord)
 	budgetRoutes.GET("/:id", handlers.ImplementedGetBudget.GetBudget)
+
 }

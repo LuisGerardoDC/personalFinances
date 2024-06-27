@@ -101,6 +101,74 @@ func (r *Record) RequestToMssql(rq requestModel.Record) {
 	r.IsExpense = rq.IsExpense
 }
 
+func (r Record) RemoveRecord(budgetID, recordID int64, db *sql.DB) error {
+	var (
+		deleteQuery       = "DELETE FROM records WHERE ID = ?;"
+		getBudgetRecords  = "SELECT Quantity, IsExpense FROM records WHERE BudgetID = ?; "
+		updateBudgetQuery = "UPDATE budgets SET TotalBudget = ?, UsedBudget = ?, RemainingBudget = ? WHERE ID = ?;"
+		budgetRecords     = []Record{}
+		budget            = Budget{}
+	)
+
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// Deletes NewRecord
+	_, err = tx.Exec(deleteQuery,
+		recordID,
+	)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Gets all Budget Records
+	stmt, err := tx.Prepare(getBudgetRecords)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rows, err := stmt.Query(budgetID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	for rows.Next() {
+		var gotR Record
+		err = rows.Scan(&gotR.Quantity, &gotR.IsExpense)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		budgetRecords = append(budgetRecords, gotR)
+	}
+	budget.ID = budgetID
+	budget.Records = budgetRecords
+
+	// Calc new quantites budget
+	budget.CalcBudgets()
+
+	// Update Budget in db
+	_, err = tx.Exec(updateBudgetQuery,
+		budget.TotalBudget,
+		budget.UsedBudget,
+		budget.RemainingBudget,
+		budget.ID,
+	)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
 func (r Record) GetRecordsByBudgetID(budgetID int64, db *sql.DB) ([]Record, error) {
 	var (
 		query      = "SELECT ID, Concept, Date, Quantity, IsExpense FROM records WHERE BudgetID = ?;"

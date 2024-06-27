@@ -9,7 +9,7 @@ var (
 	// database
 	dbConnection = utils.ConnectDB()
 
-	// dependencies
+	// useCases
 	useCaseCreateNewBudget = usecases.CreateNewBudget{
 		DB: dbConnection,
 	}
@@ -17,7 +17,11 @@ var (
 		DB: dbConnection,
 	}
 
-	useCaseGetBudgetHandler = usecases.GetBudget{
+	useCaseGetBudget = usecases.GetBudget{
+		DB: dbConnection,
+	}
+
+	useCaseDeleteRecord = usecases.RemoveRecord{
 		DB: dbConnection,
 	}
 
@@ -31,6 +35,10 @@ var (
 	}
 
 	ImplementedGetBudget = &GetBudgetHandler{
-		useCase: &useCaseGetBudgetHandler,
+		useCase: &useCaseGetBudget,
+	}
+
+	ImplementedDeleteRecordHandler = &DeleteRecordHandler{
+		useCase: &useCaseDeleteRecord,
 	}
 )
