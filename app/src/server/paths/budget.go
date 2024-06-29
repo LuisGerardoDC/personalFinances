@@ -11,5 +11,6 @@ func AddBudgetRoutes(router *gin.Engine) {
 	budgetRoutes.POST("/record", handlers.ImplementedAddRecordHandler.AddNewRecord)
 	budgetRoutes.DELETE("/record", handlers.ImplementedDeleteRecordHandler.DeleteRecord)
 	budgetRoutes.GET("/:id", handlers.ImplementedGetBudget.GetBudget)
+	budgetRoutes.GET("/user/:userid", handlers.ImplementedGetBudgets.GetBudgets)
 
 }
