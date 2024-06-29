@@ -148,7 +148,7 @@ func (b *Budget) GetByID(db *sql.DB) error {
 		return err
 	}
 
-	// Gets Budget's record
+	// Gets Budget's records
 	stmt, err := db.Prepare(getBudgetRecords)
 	if err != nil {
 		tx.Rollback()
