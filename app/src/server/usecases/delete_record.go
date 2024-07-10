@@ -32,6 +32,12 @@ func (d *RemoveRecord) DeleteRecord(req requestModel.DeleteRecord) responseModel
 		response.Error = err.Error()
 		return response
 	}
+	err = budget.GetRecords(d.DB)
+	if err != nil {
+		response.Code = 500
+		response.Error = fmt.Sprint(err.Error())
+		return response
+	}
 
 	response.Budget = budget.ToResponseBudget()
 	response.Code = 200

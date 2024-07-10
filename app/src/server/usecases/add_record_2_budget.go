@@ -35,6 +35,12 @@ func (a *AddRecord2Budget) CreateNewRecord(r requestModel.Record) responseModel.
 		rr.Error = fmt.Sprint(err.Error())
 		return rr
 	}
+	err = budget.GetRecords(a.DB)
+	if err != nil {
+		rr.Code = 500
+		rr.Error = fmt.Sprint(err.Error())
+		return rr
+	}
 
 	rr.Code = 200
 	rr.Succes = true

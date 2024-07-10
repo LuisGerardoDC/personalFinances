@@ -26,6 +26,14 @@ func (g *GetBudget) GetBudget(id int64) responseModel.Response {
 		return response
 	}
 
+	err = budget.GetRecords(g.DB)
+	if err != nil {
+		response.Code = 500
+		response.Succes = false
+		response.Error = err.Error()
+		return response
+	}
+
 	response.Budget = budget.ToResponseBudget()
 	response.Code = 200
 	response.Succes = true

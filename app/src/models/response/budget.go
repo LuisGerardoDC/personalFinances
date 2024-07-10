@@ -10,6 +10,6 @@ type Budget struct {
 	UsedBudget      float32   `json:"usedBudget"`
 	StartTime       time.Time `json:"starttime"`
 	EndTime         time.Time `json:"endtime"`
-	Assets          []Record  `json:"assets"`
-	Expenses        []Record  `json:"expenses"`
+	Assets          []Record  `json:"assets,omitempty"`
+	Expenses        []Record  `json:"expenses,omitempty"`
 }

@@ -105,25 +105,14 @@ func (b *Budget) CreateInDB(db *sql.DB) error {
 
 	return tx.Commit()
 }
-
 func (b *Budget) GetByID(db *sql.DB) error {
 	var (
-		getGudgetByID    = "SELECT ID, UserID, Name, TotalBudget,StartTime,EndTime, UsedBudget, RemainingBudget FROM budgets WHERE ID = ?;"
-		getBudgetRecords = "SELECT ID, Concept, Date, Quantity, IsExpense FROM records WHERE BudgetID = ?;"
-		records          = []Record{}
-		readRecord       Record
-		startTime        []byte
-		endTime          []byte
-		date             []byte
+		getGudgetByID = "SELECT ID, UserID, Name, TotalBudget,StartTime,EndTime, UsedBudget, RemainingBudget FROM budgets WHERE ID = ?;"
+		startTime     []byte
+		endTime       []byte
 	)
-
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-
 	// Gets Budget
-	err = tx.QueryRow(getGudgetByID, b.ID).Scan(
+	err := db.QueryRow(getGudgetByID, b.ID).Scan(
 		&b.ID,
 		&b.UserID,
 		&b.Name,
@@ -134,30 +123,38 @@ func (b *Budget) GetByID(db *sql.DB) error {
 		&b.RemainingBudget,
 	)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	b.StartTime, err = time.Parse("2006-01-02 15:04:05", string(startTime))
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	b.EndTime, err = time.Parse("2006-01-02 15:04:05", string(endTime))
 	if err != nil {
-		tx.Rollback()
+
 		return err
 	}
+
+	return nil
+}
+
+func (b *Budget) GetRecords(db *sql.DB) error {
+	var (
+		getBudgetRecords = "SELECT ID, Concept, Date, Quantity, IsExpense FROM records WHERE BudgetID = ?;"
+		records          = []Record{}
+		readRecord       Record
+		date             []byte
+	)
 
 	// Gets Budget's records
 	stmt, err := db.Prepare(getBudgetRecords)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	rows, err := stmt.Query(b.ID)
 	if err != nil {
-		tx.Rollback()
+
 		return err
 	}
 
@@ -170,12 +167,10 @@ func (b *Budget) GetByID(db *sql.DB) error {
 			&readRecord.IsExpense,
 		)
 		if err != nil {
-			tx.Rollback()
 			return err
 		}
 		readRecord.Date, err = time.Parse("2006-01-02 15:04:05", string(date))
 		if err != nil {
-			tx.Rollback()
 			return err
 		}
 		records = append(records, readRecord)
@@ -183,7 +178,7 @@ func (b *Budget) GetByID(db *sql.DB) error {
 
 	b.Records = records
 
-	return tx.Commit()
+	return nil
 }
 
 func (b *Budget) ToResponseBudget() *responseModel.Budget {
