@@ -11,6 +11,7 @@ func GetRouter() *gin.Engine {
 	config := cors.Config{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Content-Type"},
 	}
 	router.Use(cors.New(config))
 	paths.AddBudgetRoutes(router)
